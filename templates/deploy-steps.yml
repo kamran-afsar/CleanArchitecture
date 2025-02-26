@@ -1,0 +1,35 @@
+parameters:
+  - name: environmentName
+    type: string
+  - name: azureSubscription
+    type: string
+  - name: appServiceName
+    type: string
+
+steps:
+- task: DownloadBuildArtifacts@1
+  inputs:
+    buildType: 'current'
+    downloadType: 'single'
+    artifactName: 'drop'
+    downloadPath: '$(System.ArtifactsDirectory)'
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: '${{ parameters.azureSubscription }}'
+    appName: '${{ parameters.appServiceName }}'
+    package: '$(System.ArtifactsDirectory)/drop/**/*.zip'
+    deploymentMethod: 'auto'
+
+- task: AzureAppServiceSettings@1
+  inputs:
+    azureSubscription: '${{ parameters.azureSubscription }}'
+    appName: '${{ parameters.appServiceName }}'
+    resourceGroupName: '$(resourceGroupName)'
+    appSettings: |
+      [
+        {
+          "name": "ASPNETCORE_ENVIRONMENT",
+          "value": "${{ parameters.environmentName }}"
+        }
+      ] 

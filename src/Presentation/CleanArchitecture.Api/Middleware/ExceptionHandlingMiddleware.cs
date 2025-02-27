@@ -1,9 +1,4 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace Presentation.CleanArchitecture.Api.Middleware
 {
@@ -34,7 +29,7 @@ namespace Presentation.CleanArchitecture.Api.Middleware
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            
+
             var response = new ErrorResponse();
 
             switch (exception)
@@ -42,9 +37,9 @@ namespace Presentation.CleanArchitecture.Api.Middleware
                 case ValidationException validationEx:
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     response.Message = "Validation failed";
-                    response.Errors = validationEx.Errors
-                        .Select(e => e.ErrorMessage)
-                        .ToList();
+                    //response.Errors = validationEx.Errors
+                    //    .Select(e => e.ErrorMessage)
+                    //    .ToList();
                     break;
 
                 case NotFoundException notFoundEx:
@@ -76,4 +71,4 @@ namespace Presentation.CleanArchitecture.Api.Middleware
         public string Detail { get; set; }
         public List<string> Errors { get; set; } = new();
     }
-} 
+}

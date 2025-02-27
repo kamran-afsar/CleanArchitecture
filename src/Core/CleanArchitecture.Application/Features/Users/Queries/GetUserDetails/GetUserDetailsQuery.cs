@@ -1,3 +1,5 @@
+using CleanArchitecture.Application.Interfaces;
+using CleanArchitecture.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

@@ -11,6 +11,7 @@ public class EmailSettings
 {
     public SendGridSettings SendGrid { get; set; }
     public EmailTemplates Templates { get; set; }
+    public ErrorNotificationSettings ErrorNotification { get; set; }
 }
 
 public class SendGridSettings
@@ -25,6 +26,13 @@ public class EmailTemplates
     public string WelcomeEmail { get; set; }
     public string PasswordReset { get; set; }
     public string EmailVerification { get; set; }
+}
+
+public class ErrorNotificationSettings
+{
+    public bool Enabled { get; set; } = false;
+    public string Subject { get; set; } = "Error Alert - {Environment}";
+    public List<string> Recipients { get; set; } = new();
 }
 
 public class CacheSettings
@@ -90,4 +98,4 @@ public class RateLimitSettings
 public class CorsSettings
 {
     public string[] AllowedOrigins { get; set; }
-} 
+}

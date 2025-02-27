@@ -1,11 +1,5 @@
+using CleanArchitecture.Application.Interfaces;
 using Microsoft.Extensions.Logging;
-
-public interface IUserDapperRepository
-{
-    Task<UserDetailDto> GetUserDetailsByIdAsync(Guid userId);
-    Task<IEnumerable<UserWithRolesDto>> GetUsersWithRolesAsync();
-    Task<int> UpdateUserLastLoginAsync(Guid userId);
-}
 
 public class UserDapperRepository : DapperRepositoryBase, IUserDapperRepository
 {

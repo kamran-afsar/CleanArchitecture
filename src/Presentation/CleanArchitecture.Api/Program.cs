@@ -3,10 +3,12 @@ using CleanArchitecture.Application.Interfaces;
 using CleanArchitecture.Application.Interfaces.Utility;
 using CleanArchitecture.Infrastructure.Persistence;
 using CleanArchitecture.Infrastructure.Services;
+using Infrastructure.Persistence.ConnectionFactory;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SendGrid;
 using Serilog;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -83,14 +85,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
-// Register Services
 builder.Services.AddScoped<IApplicationDbContext>(provider =>
     provider.GetRequiredService<ApplicationDbContext>());
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<IDateTime, DateTimeService>();
+
+// Register Services
+builder.Services.AddScoped<IDateTimeService, DateTimeService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IDbConnectionFactory, SqlConnectionFactory>();
 builder.Services.AddScoped<IErrorNotificationService, ErrorNotificationService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+
 
 // Register SendGrid Client
 builder.Services.AddSingleton<ISendGridClient>(sp =>
@@ -118,6 +124,7 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.Http,
         Scheme = "bearer"
     });
+
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -168,7 +175,7 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<ApplicationDbContext>();
         var passwordHasher = services.GetRequiredService<IPasswordHasher>();
         await context.Database.MigrateAsync();
-        await DatabaseSeeder.SeedAsync(context, passwordHasher);
+        //await DatabaseSeeder.SeedAsync(context, passwordHasher);
     }
     catch (Exception ex)
     {

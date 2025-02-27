@@ -1,11 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+
 public abstract class EntityBase
 {
-    public Guid Id { get; protected set; }
-    public DateTime CreatedAt { get; private set; }
-    public string CreatedBy { get; private set; }
-    public DateTime? LastModifiedAt { get; private set; }
-    public string LastModifiedBy { get; private set; }
-    
+    [Key]
+    public Guid Id { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public Guid CreatedBy { get; set; }
+    public DateTime? LastModifiedAt { get; set; }
+    public Guid LastModifiedBy { get; set; }
+
     private readonly List<DomainEvent> _domainEvents = new();
     public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
@@ -18,4 +21,4 @@ public abstract class EntityBase
     {
         _domainEvents.Clear();
     }
-} 
+}

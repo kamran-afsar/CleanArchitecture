@@ -1,15 +1,8 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Net;
+using CleanArchitecture.Application.Interfaces;
+using SendGrid.Helpers.Errors.Model;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
-using CleanArchitecture.Application.Common.Exceptions;
-using CleanArchitecture.Application.Common.Models;
-using CleanArchitecture.Infrastructure.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace CleanArchitecture.Api.Middleware
 {
@@ -17,19 +10,19 @@ namespace CleanArchitecture.Api.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<GlobalExceptionHandlerMiddleware> _logger;
-        private readonly IErrorNotificationService _errorNotificationService;
         private readonly IHostEnvironment _environment;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         public GlobalExceptionHandlerMiddleware(
             RequestDelegate next,
             ILogger<GlobalExceptionHandlerMiddleware> logger,
-            IErrorNotificationService errorNotificationService,
-            IHostEnvironment environment)
+            IHostEnvironment environment,
+            IServiceScopeFactory scopeFactory) // Inject scope factory instead of IErrorNotificationService
         {
             _next = next;
             _logger = logger;
-            _errorNotificationService = errorNotificationService;
             _environment = environment;
+            _scopeFactory = scopeFactory;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -43,7 +36,13 @@ namespace CleanArchitecture.Api.Middleware
                 _logger.LogError(ex, "An unhandled exception occurred");
 
                 var requestInfo = await BuildRequestInfoAsync(context);
-                await _errorNotificationService.SendErrorNotificationAsync(ex, requestInfo);
+
+                // Create a new scope to resolve the scoped IErrorNotificationService
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var errorNotificationService = scope.ServiceProvider.GetRequiredService<IErrorNotificationService>();
+                    await errorNotificationService.SendErrorNotificationAsync(ex, requestInfo);
+                }
 
                 await HandleExceptionAsync(context, ex);
             }
@@ -105,7 +104,7 @@ namespace CleanArchitecture.Api.Middleware
         private async Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
             context.Response.ContentType = "application/json";
-            
+
             var response = new ErrorResponse
             {
                 TraceId = Activity.Current?.Id ?? context.TraceIdentifier,
@@ -117,7 +116,6 @@ namespace CleanArchitecture.Api.Middleware
                 case ValidationException validationEx:
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     response.Message = "Validation failed";
-                    response.Errors = validationEx.Errors;
                     break;
 
                 case UnauthorizedException:
@@ -137,8 +135,8 @@ namespace CleanArchitecture.Api.Middleware
 
                 default:
                     context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                    response.Message = _environment.IsDevelopment() 
-                        ? ex.Message 
+                    response.Message = _environment.IsDevelopment()
+                        ? ex.Message
                         : "An unexpected error occurred. Please try again later.";
                     break;
             }

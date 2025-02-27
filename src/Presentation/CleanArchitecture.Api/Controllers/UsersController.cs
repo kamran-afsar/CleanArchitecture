@@ -1,13 +1,10 @@
+using CleanArchitecture.Application.Features.Users.Commands.CreateUser;
+using CleanArchitecture.Application.Features.Users.Commands.UpdateUser;
+using CleanArchitecture.Application.Features.Users.Queries.GetUserById;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
-using MediatR;
-using CleanArchitecture.Application.Commands;
-using CleanArchitecture.Application.Queries;
-using CleanArchitecture.Application.Exceptions;
-using CleanArchitecture.Application.DTOs;
+using System.ComponentModel.DataAnnotations;
 
 namespace CleanArchitecture.Api.Controllers
 {
@@ -60,7 +57,7 @@ namespace CleanArchitecture.Api.Controllers
             catch (ValidationException ex)
             {
                 _logger.LogWarning(ex, "Validation failed for create user request");
-                return BadRequest(new { errors = ex.Errors });
+                return BadRequest(new { errors = ex.Message });
             }
             catch (Exception ex)
             {
@@ -97,27 +94,27 @@ namespace CleanArchitecture.Api.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> DeleteUser(Guid id)
-        {
-            try
-            {
-                _logger.LogInformation("Deleting user: {UserId}", id);
-                await _mediator.Send(new DeleteUserCommand(id));
-                _logger.LogInformation("Successfully deleted user: {UserId}", id);
-                return NoContent();
-            }
-            catch (NotFoundException ex)
-            {
-                _logger.LogWarning(ex, "User not found for deletion: {UserId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting user: {UserId}", id);
-                throw;
-            }
-        }
+        //[HttpDelete("{id}")]
+        //[Authorize(Roles = "Admin")]
+        //public async Task<ActionResult> DeleteUser(Guid id)
+        //{
+        //    try
+        //    {
+        //        _logger.LogInformation("Deleting user: {UserId}", id);
+        //        await _mediator.Send(new DeleteUserCommand(id));
+        //        _logger.LogInformation("Successfully deleted user: {UserId}", id);
+        //        return NoContent();
+        //    }
+        //    catch (NotFoundException ex)
+        //    {
+        //        _logger.LogWarning(ex, "User not found for deletion: {UserId}", id);
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error deleting user: {UserId}", id);
+        //        throw;
+        //    }
+        //}
     }
-} 
+}

@@ -1,5 +1,8 @@
 using AutoMapper;
+using CleanArchitecture.Application.Interfaces;
+using CleanArchitecture.Domain.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CleanArchitecture.Application.Features.Users.Queries.GetUserById
 {

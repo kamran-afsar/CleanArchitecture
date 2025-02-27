@@ -1,3 +1,4 @@
+using CleanArchitecture.Application.Interfaces;
 using CleanArchitecture.Application.Interfaces.Utility;
 using CleanArchitecture.Domain.Entities;
 using MediatR;
@@ -29,10 +30,10 @@ namespace CleanArchitecture.Application.Features.Users.Commands.CreateUser
                 _passwordHasher.HashPassword(request.Password)
             );
 
-            _context.Users.Add(user);
+            await _context.Users.AddAsync(user, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // Send welcome email
+            // Send welcome email asynchronously
             await SendWelcomeEmailAsync(user);
 
             return user.Id;

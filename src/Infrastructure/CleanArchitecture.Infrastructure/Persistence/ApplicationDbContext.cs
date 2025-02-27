@@ -1,20 +1,20 @@
-using System.Reflection;
-using CleanArchitecture.Application.Common.Interfaces;
-using CleanArchitecture.Domain.Common;
+using CleanArchitecture.Application.Interfaces;
+using CleanArchitecture.Application.Interfaces.Utility;
 using CleanArchitecture.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace CleanArchitecture.Infrastructure.Persistence;
 
 public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly IDateTime _dateTime;
+    private readonly IDateTimeService _dateTime;
 
     public ApplicationDbContext(
         DbContextOptions<ApplicationDbContext> options,
         ICurrentUserService currentUserService,
-        IDateTime dateTime) : base(options)
+        IDateTimeService dateTime) : base(options)
     {
         _currentUserService = currentUserService;
         _dateTime = dateTime;
@@ -23,7 +23,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
-
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         foreach (var entry in ChangeTracker.Entries<EntityBase>())
@@ -31,13 +30,13 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             switch (entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.CreatedBy = _currentUserService.UserId;
-                    entry.Entity.Created = _dateTime.Now;
+                    entry.Entity.CreatedBy = _currentUserService.UserId.Value;
+                    entry.Entity.CreatedAt = _dateTime.Now;
                     break;
 
                 case EntityState.Modified:
-                    entry.Entity.LastModifiedBy = _currentUserService.UserId;
-                    entry.Entity.LastModified = _dateTime.Now;
+                    entry.Entity.LastModifiedBy = _currentUserService.UserId.Value;
+                    entry.Entity.LastModifiedAt = _dateTime.Now;
                     break;
             }
         }
@@ -48,6 +47,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        builder.Ignore<DomainEvent>();
+
         base.OnModelCreating(builder);
     }
-} 
+}

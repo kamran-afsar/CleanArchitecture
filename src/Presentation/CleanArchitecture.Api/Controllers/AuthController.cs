@@ -1,14 +1,5 @@
-using CleanArchitecture.Application.Features.Auth.Commands.Login;
-using CleanArchitecture.Application.Features.Auth.Commands.Logout;
-using CleanArchitecture.Application.Features.Auth.Commands.RefreshToken;
-using CleanArchitecture.Application.Common.Exceptions;
-using CleanArchitecture.Application.Common.Models;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace CleanArchitecture.Api.Controllers
 {
@@ -34,10 +25,10 @@ namespace CleanArchitecture.Api.Controllers
             try
             {
                 var response = await _mediator.Send(command);
-                
+
                 // Set refresh token in HTTP-only cookie
                 SetRefreshTokenCookie(response.RefreshToken);
-                
+
                 return Ok(response);
             }
             catch (UnauthorizedException ex)
@@ -52,43 +43,43 @@ namespace CleanArchitecture.Api.Controllers
             }
         }
 
-        [HttpPost("refresh-token")]
-        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<LoginResponse>> RefreshToken()
-        {
-            var refreshToken = Request.Cookies["refreshToken"];
-            
-            if (string.IsNullOrEmpty(refreshToken))
-            {
-                return Unauthorized(new ErrorResponse { Message = "Refresh token is required" });
-            }
+        //[HttpPost("refresh-token")]
+        //[ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+        //public async Task<ActionResult<LoginResponse>> RefreshToken()
+        //{
+        //    var refreshToken = Request.Cookies["refreshToken"];
 
-            try
-            {
-                var response = await _mediator.Send(new RefreshTokenCommand { RefreshToken = refreshToken });
-                SetRefreshTokenCookie(response.RefreshToken);
-                return Ok(response);
-            }
-            catch (UnauthorizedException ex)
-            {
-                return Unauthorized(new ErrorResponse { Message = ex.Message });
-            }
-        }
+        //    if (string.IsNullOrEmpty(refreshToken))
+        //    {
+        //        return Unauthorized(new ErrorResponse { Message = "Refresh token is required" });
+        //    }
 
-        [HttpPost("logout")]
-        [Authorize]
-        public async Task<IActionResult> Logout()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!string.IsNullOrEmpty(userId))
-            {
-                await _mediator.Send(new LogoutCommand { UserId = Guid.Parse(userId) });
-            }
+        //    try
+        //    {
+        //        var response = await _mediator.Send(new RefreshTokenCommand { RefreshToken = refreshToken });
+        //        SetRefreshTokenCookie(response.RefreshToken);
+        //        return Ok(response);
+        //    }
+        //    catch (UnauthorizedException ex)
+        //    {
+        //        return Unauthorized(new ErrorResponse { Message = ex.Message });
+        //    }
+        //}
 
-            Response.Cookies.Delete("refreshToken");
-            return Ok();
-        }
+        //[HttpPost("logout")]
+        //[Authorize]
+        //public async Task<IActionResult> Logout()
+        //{
+        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    if (!string.IsNullOrEmpty(userId))
+        //    {
+        //        await _mediator.Send(new LogoutCommand { UserId = Guid.Parse(userId) });
+        //    }
+
+        //    Response.Cookies.Delete("refreshToken");
+        //    return Ok();
+        //}
 
         private void SetRefreshTokenCookie(string refreshToken)
         {

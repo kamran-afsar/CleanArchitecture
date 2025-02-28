@@ -17,13 +17,14 @@ public class User : EntityBase
 
     private User() { } // For EF Core
 
-    public User(string firstName, string lastName, string email, string passwordHash)
+    public User(string firstName, string lastName, string email, string passwordHash, string refreshToken)
     {
         FirstName = firstName;
         LastName = lastName;
         Email = email;
         PasswordHash = passwordHash;
         IsActive = true;
+        RefreshToken = refreshToken;
         UserRoles = new List<UserRole>();
     }
 

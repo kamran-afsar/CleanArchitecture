@@ -30,7 +30,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             switch (entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.CreatedBy = _currentUserService.UserId.Value;
+                    entry.Entity.CreatedBy = _currentUserService.UserId ?? Guid.NewGuid();
                     entry.Entity.CreatedAt = _dateTime.Now;
                     break;
 

@@ -27,6 +27,7 @@ namespace CleanArchitecture.Application.Features.Users.Commands.CreateUser
                 request.FirstName,
                 request.LastName,
                 request.Email,
+                "",
                 _passwordHasher.HashPassword(request.Password)
             );
 

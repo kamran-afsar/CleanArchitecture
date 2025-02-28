@@ -44,10 +44,14 @@ public class User : EntityBase
 
     public void AddRole(Role role)
     {
-        if (UserRoles.Any(ur => ur.RoleId == role.Id))
-            return;
+        if (role != null)
+        {
+            if (UserRoles.Any(ur => ur.RoleId == role.Id))
+                return;
 
-        UserRoles.Add(new UserRole(this.Id, role.Id));
+            UserRoles.Add(new UserRole(this.Id, role.Id));
+        }
+
     }
 
     public void RemoveRole(Role role)
@@ -90,4 +94,4 @@ public class User : EntityBase
     {
         IsActive = true;
     }
-} 
+}

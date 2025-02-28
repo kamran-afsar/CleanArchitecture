@@ -1,5 +1,4 @@
 using CleanArchitecture.Domain.Entities;
-using System;
 
 public class UserRole : EntityBase
 {
@@ -8,11 +7,11 @@ public class UserRole : EntityBase
     public Guid RoleId { get; private set; }
     public Role Role { get; private set; }
 
-    private UserRole() { } // For EF Core
+    private UserRole() { }
 
     public UserRole(Guid userId, Guid roleId)
     {
         UserId = userId;
         RoleId = roleId;
     }
-} 
+}

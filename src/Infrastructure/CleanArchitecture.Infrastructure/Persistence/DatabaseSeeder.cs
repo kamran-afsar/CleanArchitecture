@@ -15,7 +15,7 @@ namespace CleanArchitecture.Infrastructure.Services
         public DatabaseSeeder(
             ApplicationDbContext context,
             IPasswordHasher passwordHasher,
-            ILogger<DatabaseSeeder> logger)
+            ILogger<DatabaseSeeder>? logger)
         {
             _context = context;
             _passwordHasher = passwordHasher;
@@ -36,6 +36,7 @@ namespace CleanArchitecture.Infrastructure.Services
                 throw;
             }
         }
+
 
         private async Task SeedRolesAsync()
         {
@@ -58,7 +59,7 @@ namespace CleanArchitecture.Infrastructure.Services
             // Add default admin user
             if (!await _context.Users.AnyAsync(u => u.Email == "admin@example.com"))
             {
-                var adminRole = await _context.Roles.FirstAsync(r => r.Name == Roles.Admin);
+                var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == Roles.Admin);
 
                 var adminUser = new User(
                     "Admin",
@@ -76,7 +77,7 @@ namespace CleanArchitecture.Infrastructure.Services
             // Add default regular user
             if (!await _context.Users.AnyAsync(u => u.Email == "user@example.com"))
             {
-                var userRole = await _context.Roles.FirstAsync(r => r.Name == Roles.User);
+                var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == Roles.User);
 
                 var defaultUser = new User(
                     "Default",

@@ -50,5 +50,15 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         builder.Ignore<DomainEvent>();
 
         base.OnModelCreating(builder);
+
+        _ = builder.Entity<UserRole>()
+            .HasOne(u => u.User)
+            .WithMany(ur => ur.UserRoles)
+            .HasForeignKey(u => u.UserId);
+
+        _ = builder.Entity<UserRole>()
+            .HasOne(r => r.Role)
+            .WithMany(ur => ur.UserRoles)
+            .HasForeignKey(r => r.RoleId);
     }
 }

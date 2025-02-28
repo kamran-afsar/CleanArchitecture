@@ -174,8 +174,11 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         var passwordHasher = services.GetRequiredService<IPasswordHasher>();
+        var logger = services.GetRequiredService<ILogger<DatabaseSeeder>>();
         await context.Database.MigrateAsync();
-        //await DatabaseSeeder.SeedAsync(context, passwordHasher);
+
+        var seeder = new DatabaseSeeder(context, passwordHasher, logger);
+        await seeder.SeedAsync();
     }
     catch (Exception ex)
     {
@@ -184,5 +187,6 @@ using (var scope = app.Services.CreateScope())
         throw;
     }
 }
+
 
 app.Run();
